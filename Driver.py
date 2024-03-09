@@ -4,6 +4,7 @@ from actor import *
 from util import *
 import random
 
+simspeed = 3
 
 root = Tk()
 root.title("World Simulation")
@@ -14,6 +15,8 @@ canvas.pack()
 
 Actor.tk_root = root
 Actor.canvas = canvas
+Actor.simspeed = simspeed
+Location.canvas = canvas
 
 locations = []
 actors = []
@@ -28,6 +31,7 @@ def paint(pos, size = 5, colour="white"):
 def add_location(location):
     locations.append(location)
     Actor.destinations = locations
+    location.p_graphic = paint(location.position, 20, "white")
     paint(location.position, 10, "#f5800a")
 
 
@@ -44,7 +48,7 @@ for i in dl:
     add_location(Location(i[0], Vector2(i[1],i[2])))
 
 for i in range(300):
-    add_actor(Actor(random_name_ship(), Vector2(random.randint(0, 2000), random.randint(0, 1000)), random.choice(locations), random.randint(2, 5)))
+    add_actor(Actor(random_name_ship(), random.choice(locations).position, random.choice(locations), random.randint(2, 5)))
 
 
 
@@ -52,6 +56,10 @@ def tick():
     root.after(50, tick) # after 1,000 milliseconds, call tick() again
     for actor in actors:
         actor.update()
+
+    for location in locations:
+        location.update()
+
 
 tick()
 
