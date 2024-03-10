@@ -1,5 +1,6 @@
 from util import *
 from resource import *
+import math
 
 class Location:
 	canvas = None
@@ -19,21 +20,38 @@ class Location:
 	def update(self):
 		self.update_graphics()
 
-	def GetSupply(self, resource):
-		for i in stocks:
-			if i == resource:
+
+	def get_supply(self, resource):
+		for i in self.stocks:
+			if i.resource == resource:
 				return i.supply.amount
 		return 0
 
-	def GetDemand(self, resource):
-		for i in stocks:
-			if i == resource:
+
+	def get_demand(self, resource):
+		for i in self.stocks:
+			if i.resource == resource:
 				return i.demand.amount
 		return 0
 
 
+	def get_total_supply(self):
+		t = 0
+		for i in self.stocks:
+			t += i.supply.amount
+		return t
+
+
+	def get_total_demand(self):
+		t = 0
+		for i in self.stocks:
+			t += i.demand.amount
+		return t
+
+
 	def update_graphics(self):
-		n = clamp(self.prosperity, 0, 255)
+		#n = clamp((int)((self.get_total_demand() + self.get_total_supply())**(1/1.5)*5)//1, 10, 255)
+		n = clamp((int)((self.get_total_demand() + self.get_total_supply())**(1/1)*1)//1, 10, 255)
 		pos = self.position
 		size = n/10 + 10
 		x1, y1 = (pos.x - size), (pos.y - size)
@@ -42,13 +60,23 @@ class Location:
 		self.canvas.itemconfig(self.p_graphic, fill=rgb_to_hex(n//2,n//2,n//2))
 
 
-	def buy_resource(self, resource, amount):
+	#returns the amount of resources given
+	def give_resource(self, resource, amount):
 		for i in self.stocks:
 			if i.resource == resource:
 				if i.supply.amount < amount:
 					amount = i.supply.amount
 				i.supply.change(-amount)
+				i.demand.change(amount)
 				return amount
+
+
+	
+	def get_resource(self, resource, amount):
+		for i in self.stocks:
+			if i.resource == resource:
+				i.supply.change(amount)
+				i.demand.change(-amount)
 
 
 
