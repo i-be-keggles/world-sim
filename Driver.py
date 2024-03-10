@@ -2,6 +2,7 @@ from tkinter import *
 from location import *
 from actor import *
 from util import *
+from resource import *
 import random
 
 simspeed = 3
@@ -33,6 +34,11 @@ def add_location(location):
     Actor.destinations = locations
     location.p_graphic = paint(location.position, 20, "white")
     paint(location.position, 10, "#f5800a")
+    
+    p = location.position + Vector2(0, 18)
+    canvas.create_text(p.x, p.y, text=location.name, fill="white")
+
+    return location
 
 
 def add_actor(actor):
@@ -40,16 +46,30 @@ def add_actor(actor):
     actor.canvas = canvas
     actor.graphics = paint(actor.position, 5, colour="#476042")
 
+    return actor
 
 
-dl = [["Junderswort", 500, 400], ["Bellhaven", 800, 200], ["Thim", 1500, 800], ["Newport", 1800, 500], ["Drackensfir", 200, 100], ["March's Rest", 250, 900], ["Senn", 1100, 400], ["Marlin Cove", 600, 600], ["The Dockyards", 900, 700], ["St Kierz'", 1600, 300]]
+
+dl = [
+        ["Junderswort", 500, 400, [[50,0],[0,0]]], ["Bellhaven", 800, 200, [[0,50],[0,0]]], ["Thim", 1500, 800, [[0,0],[0,0]]],
+        ["Newport", 1800, 500, [[0,0],[0,0]]], ["Drackensfir", 200, 100, [[0,0],[0,0]]], ["March's Rest", 250, 900, [[100,0],[0,80]]],
+        ["Senn", 1100, 400, [[50,30],[30,50]]], ["Marlin Cove", 600, 600, [[0,0],[0,0]]], ["The Dockyards", 900, 700, [[0,0],[0,0]]],
+        ["St Kierz'", 1600, 300, [[0,10],[30,0]]]]
 
 for i in dl:
-    add_location(Location(i[0], Vector2(i[1],i[2])))
+    l = add_location(Location(i[0], Vector2(i[1],i[2])))
+    for j in range(len(i[3])):
+        l.stocks.append(Stock(resources[j], i[3][j][0], i[3][j][1]))
 
-for i in range(300):
-    add_actor(Actor(random_name_ship(), random.choice(locations).position, random.choice(locations), random.randint(2, 5)))
+for i in locations:
+    print(i, end=" ")
+    print(i.stocks)
 
+for i in range(500):
+    l = random.choice(locations)
+    add_actor(Actor(random_name_ship(), l.position, l, random.randint(2, 5), random.randint(2, 15)))
+
+add_actor(Actor("Jimmy", locations[0].position, locations[0], 3, 10))
 
 
 def tick():
