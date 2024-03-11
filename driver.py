@@ -3,9 +3,10 @@ from location import *
 from actor import *
 from util import *
 from resource import *
+from analytics import *
 import random
 
-simspeed = 5
+simspeed = 3
 n_actors = 10
 resource_multiplier = 1
 
@@ -76,6 +77,9 @@ add_actor(Trader("Jimmy", locations[0].position, locations[0], 3, 10))
 
 print()
 
+graph = ResourceGraph(locations[0], Resource("Fuel", 0))
+#graph = RGraph()
+
 def tick():
     root.after(50, tick) # after 1,000 milliseconds, call tick() again
     for actor in actors:
@@ -83,6 +87,8 @@ def tick():
 
     for location in locations:
         location.update()
+
+    #graph.update()
 
 
 tick()

@@ -5,19 +5,40 @@ import math
 class Location:
 	canvas = None
 
-	def __init__(self, name, position, stocks = [], prosperity = 50, p_graphic = None):
+	def __init__(self, name, position, stocks = None, generators = None, prosperity = 50, p_graphic = None):
 		self.name = name
 		self.position = position
 		self.prosperity = prosperity
-		self.stocks = []
+
+		self.stocks = stocks
+		if self.stocks is None:
+			self.stocks = []
+
+		self.generators = generators
+		if self.generators is None:
+			self.generators = []
+
 
 	def __str__(self):
 		return f"{self.name}"
 
+
 	def __repr__(self):
 		return f"{self.name}"
 
+
 	def update(self):
+
+		gtd = []
+		for generator in self.generators:
+			n = generator.update()
+			self.get_resource(generator.resource, n)
+			if generator.cap <= 0:
+				gtd.append(generator)
+
+		for f in gtd:
+			self.generators.remove(g)
+
 		self.update_graphics()
 
 
