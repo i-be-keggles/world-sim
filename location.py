@@ -31,9 +31,9 @@ class Location:
 
 		gtd = []
 		for generator in self.generators:
-			n = generator.update()
+			n = generator.generate()
 			self.get_resource(generator.resource, n)
-			if generator.cap <= 0:
+			if generator.cap is not None and generator.cap <= 0:
 				gtd.append(generator)
 
 		for f in gtd:

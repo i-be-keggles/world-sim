@@ -9,6 +9,7 @@ import random
 simspeed = 3
 n_actors = 10
 resource_multiplier = 1
+resource_generation_rate = 0.01
 
 root = Tk()
 root.title("World Simulation")
@@ -21,6 +22,8 @@ Actor.tk_root = root
 Actor.canvas = canvas
 Actor.simspeed = simspeed
 Location.canvas = canvas
+
+Generator.generation_rate = resource_generation_rate
 
 locations = []
 actors = []
@@ -54,15 +57,18 @@ def add_actor(actor):
 
 
 dl = [
-        ["Junderswort", 500, 400, [[50,0],[0,0]]], ["Bellhaven", 800, 200, [[0,50],[0,0]]], ["Thim", 1500, 800, [[5,10],[5,10]]],
-        ["Newport", 1800, 500, [[10,0],[0,20]]], ["Drackensfir", 200, 100, [[50,50],[0,20]]], ["March's Rest", 250, 900, [[100,0],[0,80]]],
-        ["Senn", 1100, 400, [[50,30],[30,50]]], ["Marlin Cove", 600, 600, [[0,0],[80,0]]], ["The Dockyards", 900, 700, [[0,8000],[0,0]]],
+        ["Junderswort", 500, 400, [[50,0, -1],[0,0]]], ["Bellhaven", 800, 200, [[0,50],[0,0, 1]]], ["Thim", 1500, 800, [[5,10, -0.5],[5,10,-0.5]]],
+        ["Newport", 1800, 500, [[10,0, 1],[0,20]]], ["Drackensfir", 200, 100, [[50,50, 1],[0,20, 0.2]]], ["March's Rest", 250, 900, [[100,0],[0,80, -1]]],
+        ["Senn", 1100, 400, [[50,30, 1],[30,50, -0.5]]], ["Marlin Cove", 600, 600, [[0,0],[80,0, 1]]], ["The Dockyards", 900, 700, [[0,80, -1],[0,0]]],
         ["St Kierz'", 1600, 300, [[0,10],[30,0]]]]
 
 for i in dl:
     l = add_location(Location(i[0], Vector2(i[1],i[2])))
     for j in range(len(i[3])):
         l.stocks.append(Stock(resources[j], i[3][j][0] * resource_multiplier, i[3][j][1] * resource_multiplier))
+        if len(i[3][j]) > 2:
+            l.generators.append(Generator(resources[j], i[3][j][2]))
+
 
 for i in locations:
     print(i, end=" ")
@@ -74,11 +80,10 @@ for i in range(n_actors):
 
 add_actor(Trader("Jimmy", locations[0].position, locations[0], 3, 10))
 
-
 print()
 
-graph = ResourceGraph(locations[0], Resource("Fuel", 0))
-#graph = RGraph()
+#graph = ResourceGraph(locations[0], resources)
+analytics = AnalyticsWindow(locations)
 
 def tick():
     root.after(50, tick) # after 1,000 milliseconds, call tick() again
@@ -87,8 +92,6 @@ def tick():
 
     for location in locations:
         location.update()
-
-    #graph.update()
 
 
 tick()
