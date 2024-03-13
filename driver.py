@@ -7,9 +7,9 @@ from analytics import *
 import random
 
 simspeed = 3
-n_actors = 10
+n_actors = 15
 resource_multiplier = 1
-resource_generation_rate = 0.01
+resource_generation_rate = 0.02
 
 root = Tk()
 root.title("World Simulation")
@@ -57,10 +57,10 @@ def add_actor(actor):
 
 
 dl = [
-        ["Junderswort", 500, 400, [[50,0, -1],[0,0]]], ["Bellhaven", 800, 200, [[0,50],[0,0, 1]]], ["Thim", 1500, 800, [[5,10, -0.5],[5,10,-0.5]]],
-        ["Newport", 1800, 500, [[10,0, 1],[0,20]]], ["Drackensfir", 200, 100, [[50,50, 1],[0,20, 0.2]]], ["March's Rest", 250, 900, [[100,0],[0,80, -1]]],
-        ["Senn", 1100, 400, [[50,30, 1],[30,50, -0.5]]], ["Marlin Cove", 600, 600, [[0,0],[80,0, 1]]], ["The Dockyards", 900, 700, [[0,80, -1],[0,0]]],
-        ["St Kierz'", 1600, 300, [[0,10],[30,0]]]]
+        ["Junderswort", 500, 400, [[100,100, -1],[20,50, +0.5]]], ["Bellhaven", 800, 200, [[100,60, -1],[60,80, 1]]], ["Thim", 1500, 800, [[60,40, 0.75],[40,30,-0.5]]],
+        ["Newport", 1800, 500, [[10,40, 1],[60,50, -1]]], ["Drackensfir", 200, 100, [[50,60, 1],[50,20, 0.2]]], ["March's Rest", 250, 900, [[100,60, 0.1],[60,80, -1]]],
+        ["Senn", 1100, 400, [[80,100, 1],[100,80, -0.5]]], ["Marlin Cove", 600, 600, [[25,30, 0.2],[80,40, 3]]], ["The Dockyards", 900, 700, [[90,120, -1],[80,50, -0.5]]],
+        ["St Kierz'", 1600, 300, [[30,30, -0.5],[70,100, -2]]]]
 
 for i in dl:
     l = add_location(Location(i[0], Vector2(i[1],i[2])))

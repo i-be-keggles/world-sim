@@ -21,6 +21,8 @@ class Actor():
 
 		self.state = "moving"
 
+		self.prev_sell = []
+
 
 	def update(self):
 		if self.state == "moving":
@@ -32,7 +34,7 @@ class Actor():
 		self.position += d
 		self.canvas.move(self.graphics, d.x, d.y)
 
-		if Vector2.distance(self.position, self.destination.position) <= 15:
+		if Vector2.distance(self.position, self.destination.position) <= self.speed * self.simspeed:
 			self.arrive_at_location()
 
 
@@ -61,12 +63,14 @@ class Actor():
 		self.destination.prosperity += 5
 
 		# find item with highest supply
-		supply = [s.supply.amount for s in self.destination.stocks]
+		supply = [s.supply for s in self.destination.stocks]
 		#stock = self.destination.stocks[supply.index(max([s.supply.amount for s in self.destination.stocks]))]
 		resource = self.find_best_buy(self.destination, next_destination)
 		if resource is None:
 			print(f"No good buy.")
 			return
+
+		self.prev_sell = []
 
 		a = self.get_free_cargo_space()
 		#buy as much as possible
@@ -76,9 +80,7 @@ class Actor():
 		if a > 0:
 			self.add_cargo(ResourceStock(resource, a))
 
-		print(f"{self.name} bought {a} {resource.name} from {self.destination.name} ({self.destination.stocks})")
-
-		#self.debug_all_cargo()
+		print(f"{self.name} bought {a} {resource['name']} from {self.destination.name} ({self.destination.stocks})")
 
 
 	def sell(self):
@@ -93,7 +95,9 @@ class Actor():
 			self.destination.get_resource(stock.resource, stock.amount)
 			self.cargo.remove(stock)
 
-			ps += f"{stock.amount} {stock.resource.name} "
+			self.prev_sell.append(stock)
+
+			ps += f"{stock.amount} {stock.resource['name']} "
 
 
 		print(f"{self.name} sold {ps}to {self.destination.name} ({self.destination.stocks})")
@@ -142,13 +146,17 @@ class Actor():
 		p_buy = []
 		weights = []
 		for stock in cur_destination.stocks:
-			if stock.supply.amount > stock.demand.amount:
+			if stock.supply > stock.target and stock.resource not in self.prev_sell:
 				p_buy.append(stock.resource)
 				weights.append(next_destination.get_demand(stock.resource))
 
 		if len(p_buy) == 0 or max(weights) == 0:
 			return None
 		else:
+			m = min(weights)
+			if m < 0:
+				for i in range(len(weights)):
+					weights[i] -= m
 			return random.choices(p_buy, weights)[0]
 
 
@@ -164,7 +172,7 @@ class Trader(Actor):
 		p_supply = []
 
 		for stock in self.destination.stocks:
-			if stock.supply.amount > stock.demand.amount:
+			if stock.supply > stock.target:
 				p_supply.append(stock.resource)
 
 		#find valid selling locations

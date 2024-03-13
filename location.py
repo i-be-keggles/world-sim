@@ -32,6 +32,15 @@ class Location:
 		gtd = []
 		for generator in self.generators:
 			n = generator.generate()
+			s = self.get_supply(generator.resource)
+			
+			#handle min 0
+#			if n < 0 and s - n < 0:
+#				print("would dide")
+#				if generator.cap is not None:
+#					generator.cap += n - s
+#			n = s
+			
 			self.get_resource(generator.resource, n)
 			if generator.cap is not None and generator.cap <= 0:
 				gtd.append(generator)
@@ -44,35 +53,42 @@ class Location:
 
 	def get_supply(self, resource):
 		for i in self.stocks:
-			if i.resource == resource:
-				return i.supply.amount
+			if i.resource['id'] == resource['id']:
+				return i.supply
+		return 0
+
+
+	def get_target_supply(self, resource):
+		for i in self.stocks:
+			if i.resource['id'] == resource['id']:
+				return i.target
 		return 0
 
 
 	def get_demand(self, resource):
 		for i in self.stocks:
 			if i.resource == resource:
-				return i.demand.amount
+				return i.target - i.supply
 		return 0
 
 
 	def get_total_supply(self):
 		t = 0
 		for i in self.stocks:
-			t += i.supply.amount
+			t += i.supply
 		return t
 
 
 	def get_total_demand(self):
 		t = 0
 		for i in self.stocks:
-			t += i.demand.amount
+			t += i.demand
 		return t
 
 
 	def update_graphics(self):
 		#n = clamp((int)((self.get_total_demand() + self.get_total_supply())**(1/1.5)*5)//1, 10, 255)
-		n = clamp((int)((self.get_total_demand() + self.get_total_supply())**(1/1)*1)//1, 10, 255)
+		n = clamp((int)((self.get_total_supply())**(1/1)*1)//1, 10, 255)
 		pos = self.position
 		size = n/10 + 10
 		x1, y1 = (pos.x - size), (pos.y - size)
@@ -85,10 +101,9 @@ class Location:
 	def give_resource(self, resource, amount):
 		for i in self.stocks:
 			if i.resource == resource:
-				if i.supply.amount < amount:
-					amount = i.supply.amount
-				i.supply.change(-amount)
-				i.demand.change(amount)
+				if i.supply < amount:
+					amount = i.supply
+				i.supply -= amount
 				return amount
 
 
@@ -96,19 +111,18 @@ class Location:
 	def get_resource(self, resource, amount):
 		for i in self.stocks:
 			if i.resource == resource:
-				i.supply.change(amount)
-				i.demand.change(-amount)
+				i.supply += amount
 
 
 
 class Stock():
-	def __init__(self, resource, supply_value, demand_value):
+	def __init__(self, resource, supply_value, target_value):
 		self.resource = resource
-		self.supply = ResourceStock(resource, supply_value)
-		self.demand = ResourceStock(resource, demand_value)
+		self.supply = supply_value
+		self.target = target_value
 
 	def __str__(self):
-		return f"{self.resource.name}, s:{self.supply.amount} d:{self.demand.amount}"
+		return f"{self.resource['name']}, {round(self.supply, 1)}/{self.target}"
 
 	def __repr__(self):
 		return self.__str__()

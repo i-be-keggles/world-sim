@@ -1,19 +1,9 @@
 import math
 
-class Resource():
-	def __init__(self, name, value, legality = 5):
-		self.name = name
-		self.value = value
-		self.legality = legality
-
-	def __str__(self):
-		return f"{self.name}: c{self.value}, l{self.legality}"
-
-	def __repr__(self):
-		return self.__str__()
-
-	def __eq__(self, other):
-		return self.name == other.name
+resources = [
+	{'id': 0, "name":"Fuel", "value":5, "legality": 10},
+	{'id': 1, "name":"Food", "value":2, "legality": 10},
+]
 
 
 class ResourceStock():
@@ -48,8 +38,3 @@ class Generator:
 			self.cap -= math.abs(n) * self.generation_rate
 
 		return n
-
-
-#turn unto dictionary. separate class for resources unecessary
-#resources = [{"id":0, "name": "Fuel", "value": 3}, {"id":1, "name": "Food", "value": 3}]
-resources = [Resource("Fuel", 3), Resource("Food", 3)]
