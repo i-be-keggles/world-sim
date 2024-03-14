@@ -123,7 +123,7 @@ class Actor():
 	def find_new_destination(self):
 		d = self.destinations.copy()
 		d.remove(self.destination)
-		w, d = self.destination_weights(d, 1, 0)
+		w, d = self.destination_weights(d, 1, 1)
 		d = random.choices(d, weights = w)
 		return d[0]
 
@@ -191,19 +191,27 @@ class Trader(Actor):
 			for l in td:
 				d.remove(l)
 		else:
-			print("Inoperable. Moving.")
-
-		print(f"Sell points: {d}")
+			#print("Inoperable. Moving.")
+			pass
 
 		w = [0 for x in d]
 		
 		n = range(len(d))
 
 		for i in n:
-			w[i] += (1 + (1000000/Vector2.distance(self.position, d[i].position)**2)**1.5) * w_distance
+			dis = (1 + (1000000/Vector2.distance(self.position, d[i].position)**2)**1.5)
+			w[i] += dis * w_distance
 
 		for i in n:
-			w[i] += (d[i].prosperity * 3) * w_prosperity
+			s = []
+			for stock in self.destination.stocks:
+				s.append(d[i].get_demand(stock.resource) - self.destination.get_demand(stock.resource))
+
+			best = s.index(max(s))
+
+			w[i] += s[best]/5 * w_prosperity
+
+			#print(f"{d[i].name} {resources[best]['name']}: {round(s[best])} ({round(d[i].get_demand(resources[best]))} - {round(self.destination.get_demand(resources[best]))})")
 
 		for i in n:
 			w[i] += 0

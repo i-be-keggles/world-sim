@@ -7,7 +7,7 @@ from analytics import *
 import random
 
 simspeed = 3
-n_actors = 15
+n_actors = 20
 resource_multiplier = 1
 resource_generation_rate = 0.02
 

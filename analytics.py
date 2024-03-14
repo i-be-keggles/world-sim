@@ -49,7 +49,7 @@ class ResourceGraph:
 
         self.ax = self.fig.add_subplot(2, 5, index)
         
-        self.ax.set_title(f"{self.location.name} supply")
+        self.ax.set_title(f"{self.location.name}")
 
         #display 0 axis
         #self.ax.plot([0,self.tick_range], [0,0], color='grey', linestyle="dashed")
