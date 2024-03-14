@@ -40,6 +40,7 @@ class AnalyticsWindow():
 
 class ResourceGraph:
     tick_range = 150
+    resource_multiplier = 1
 
     def __init__(self, location, resources, fig, index):
         self.location = location
@@ -88,4 +89,4 @@ class ResourceGraph:
             self.supply_lines[i].set_data(self.time_axis, self.supply_values[i])
 
         self.ax.set_xlim(0, max(self.time_axis))
-        self.ax.set_ylim(0, 150)
+        self.ax.set_ylim(0, 150 * self.resource_multiplier)

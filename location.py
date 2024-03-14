@@ -4,6 +4,7 @@ import math
 
 class Location:
 	canvas = None
+	resource_multiplier = 1
 
 	def __init__(self, name, position, stocks = None, generators = None, prosperity = 50, p_graphic = None):
 		self.name = name
@@ -88,7 +89,7 @@ class Location:
 
 	def update_graphics(self):
 		#n = clamp((int)((self.get_total_demand() + self.get_total_supply())**(1/1.5)*5)//1, 10, 255)
-		n = clamp((int)((self.get_total_supply())**(1/1)*1)//1, 10, 255)
+		n = clamp((int)((self.get_total_supply())**(1/1)*1)//self.resource_multiplier, 10, 255)
 		pos = self.position
 		size = n/10 + 10
 		x1, y1 = (pos.x - size), (pos.y - size)

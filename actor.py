@@ -41,19 +41,23 @@ class Actor():
 	def arrive_at_location(self):
 		self.state = "waiting"
 		self.tk_root.after(random.randint(2000,6000) // self.simspeed, self.leave_location)
-		#print(f"{self.name} arrived at {self.destination.name}")
 		#self.destination.prosperity += 5
+
+		print(f"{self.name} arrived at {self.destination.name}")
+
 		self.sell()
+		print()
 
 
 	def leave_location(self):
 		#self.destination.prosperity -= 5
 
 		dest = self.find_new_destination()
+
 		self.buy(next_destination=dest)
 		self.destination = dest
 
-		#print(f"{self.name} setting out to {self.destination.name}")
+		print(f"{self.name} heading off to {dest.name}")
 
 		self.state = "moving"
 		print()
@@ -80,7 +84,7 @@ class Actor():
 		if a > 0:
 			self.add_cargo(ResourceStock(resource, a))
 
-		print(f"{self.name} bought {a} {resource['name']} from {self.destination.name} ({self.destination.stocks})")
+		print(f"Bought {a} {resource['name']}")
 
 
 	def sell(self):
@@ -100,7 +104,7 @@ class Actor():
 			ps += f"{stock.amount} {stock.resource['name']} "
 
 
-		print(f"{self.name} sold {ps}to {self.destination.name} ({self.destination.stocks})")
+		print(f"Sold {ps}")
 
 
 
@@ -146,11 +150,11 @@ class Actor():
 		p_buy = []
 		weights = []
 		for stock in cur_destination.stocks:
-			if stock.supply > stock.target and stock.resource not in self.prev_sell:
-				p_buy.append(stock.resource)
-				weights.append(next_destination.get_demand(stock.resource))
+			if stock.supply > stock.target and stock.resource not in [p.resource for p in self.prev_sell]:
+					p_buy.append(stock.resource)
+					weights.append(next_destination.get_demand(stock.resource))
 
-		if len(p_buy) == 0 or max(weights) == 0:
+		if len(p_buy) == 0 or max(weights) < 0 or sum(weights) == 0:
 			return None
 		else:
 			m = min(weights)

@@ -8,7 +8,7 @@ import random
 
 simspeed = 3
 n_actors = 20
-resource_multiplier = 1
+resource_multiplier = 2
 resource_generation_rate = 0.02
 
 root = Tk()
@@ -22,6 +22,8 @@ Actor.tk_root = root
 Actor.canvas = canvas
 Actor.simspeed = simspeed
 Location.canvas = canvas
+Location.resource_multiplier = resource_multiplier
+ResourceGraph.resource_multiplier = resource_multiplier
 
 Generator.generation_rate = resource_generation_rate
 
