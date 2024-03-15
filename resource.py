@@ -3,6 +3,7 @@ import math
 resources = [
 	{'id': 0, "name":"Fuel", "value":5, "legality": 10},
 	{'id': 1, "name":"Food", "value":2, "legality": 10},
+	{'id': 2, "name":"Drugs", "value":20000, "legality": 0},
 ]
 
 

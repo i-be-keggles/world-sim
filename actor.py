@@ -55,9 +55,8 @@ class Actor():
 		dest = self.find_new_destination()
 
 		self.buy(next_destination=dest)
+		print(f"{self.name} starting from {self.destination.name} to {dest.name}")
 		self.destination = dest
-
-		print(f"{self.name} heading off to {dest.name}")
 
 		self.state = "moving"
 		print()
@@ -152,7 +151,7 @@ class Actor():
 		for stock in cur_destination.stocks:
 			if stock.supply > stock.target and stock.resource not in [p.resource for p in self.prev_sell]:
 					p_buy.append(stock.resource)
-					weights.append(next_destination.get_demand(stock.resource))
+					weights.append(next_destination.get_demand(stock.resource) * stock.resource['value'])
 
 		if len(p_buy) == 0 or max(weights) < 0 or sum(weights) == 0:
 			return None
@@ -210,12 +209,17 @@ class Trader(Actor):
 			s = []
 			for stock in self.destination.stocks:
 				s.append(d[i].get_demand(stock.resource) - self.destination.get_demand(stock.resource))
+				if stock.resource not in [x.resource for x in d[i].stocks]:
+					s[-1] = 0
+				else:
+					s[-1] *= stock.resource['value']/3
+				print(f"{d[i].name} {stock.resource['name']} {s[-1]}")
 
 			best = s.index(max(s))
 
-			w[i] += s[best]/5 * w_prosperity
+			w[i] += s[best]/6 * w_prosperity
 
-			#print(f"{d[i].name} {resources[best]['name']}: {round(s[best])} ({round(d[i].get_demand(resources[best]))} - {round(self.destination.get_demand(resources[best]))})")
+			print(f"Best: {d[i].name} {resources[best]['name']}: {round(s[best])} ({round(d[i].get_demand(resources[best]))} - {round(self.destination.get_demand(resources[best]))})")
 
 		for i in n:
 			w[i] += 0
