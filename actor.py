@@ -8,11 +8,13 @@ class Actor():
 	canvas = None
 	simspeed = 1
 
-	def __init__(self, name, position, destination, speed, cargo_cap, graphics=None):
+	def __init__(self, name, position, destination, speed, cargo_cap, lawfulness = 10, graphics=None):
 		self.name = name
 		self.position = position
 		self.destination = destination
 		self.speed = speed
+
+		self.lawfulness = lawfulness
 
 		self.cargo_capacity = cargo_cap
 		self.cargo = []
@@ -41,25 +43,23 @@ class Actor():
 	def arrive_at_location(self):
 		self.state = "waiting"
 		self.tk_root.after(random.randint(2000,6000) // self.simspeed, self.leave_location)
-		#self.destination.prosperity += 5
 
-		print(f"{self.name} arrived at {self.destination.name}")
+		#print(f"{self.name} arrived at {self.destination.name}")
 
 		self.sell()
-		print()
+		#print()
 
 
 	def leave_location(self):
-		#self.destination.prosperity -= 5
 
 		dest = self.find_new_destination()
 
 		self.buy(next_destination=dest)
-		print(f"{self.name} starting from {self.destination.name} to {dest.name}")
+		#print(f"{self.name} starting from {self.destination.name} to {dest.name}")
 		self.destination = dest
 
 		self.state = "moving"
-		print()
+		#print()
 
 
 	def buy(self, next_destination):
@@ -68,9 +68,9 @@ class Actor():
 		# find item with highest supply
 		supply = [s.supply for s in self.destination.stocks]
 		#stock = self.destination.stocks[supply.index(max([s.supply.amount for s in self.destination.stocks]))]
-		resource = self.find_best_buy(self.destination, next_destination)
+		resource = self.find_best_buy(self.destination, next_destination, log=True)
 		if resource is None:
-			print(f"No good buy.")
+			#print(f"No good buy.")
 			return
 
 		self.prev_sell = []
@@ -83,7 +83,10 @@ class Actor():
 		if a > 0:
 			self.add_cargo(ResourceStock(resource, a))
 
-		print(f"Bought {a} {resource['name']}")
+		#print(f"Bought {a} {resource['name']}")
+		if resource['name'] == 'Drugs':
+				print(f"Drug run from l{self.lawfulness}")
+		print()
 
 
 	def sell(self):
@@ -103,7 +106,7 @@ class Actor():
 			ps += f"{stock.amount} {stock.resource['name']} "
 
 
-		print(f"Sold {ps}")
+		#print(f"Sold {ps}")
 
 
 
@@ -145,13 +148,19 @@ class Actor():
 		return w, d
 
 
-	def find_best_buy(self, cur_destination, next_destination):
+	def find_best_buy(self, cur_destination, next_destination, w_demand = 1, w_lawfulness = 10, log=False):
 		p_buy = []
 		weights = []
 		for stock in cur_destination.stocks:
 			if stock.supply > stock.target and stock.resource not in [p.resource for p in self.prev_sell]:
 					p_buy.append(stock.resource)
-					weights.append(next_destination.get_demand(stock.resource) * stock.resource['value'])
+					w = 0
+					w += next_destination.get_demand(stock.resource) * stock.resource['value'] * w_demand
+					w += (stock.resource['legality'] - max(stock.resource['legality'], self.lawfulness)) * w_lawfulness * stock.resource['value']
+					weights.append(w)
+
+					if log:
+						print(f"stock: {stock.resource['name']}, lawfulness: {self.lawfulness}, weight:{w}")
 
 		if len(p_buy) == 0 or max(weights) < 0 or sum(weights) == 0:
 			return None
@@ -213,13 +222,25 @@ class Trader(Actor):
 					s[-1] = 0
 				else:
 					s[-1] *= stock.resource['value']/3
-				print(f"{d[i].name} {stock.resource['name']} {s[-1]}")
+				#print(f"{d[i].name} {stock.resource['name']} {s[-1]}")
+
 
 			best = s.index(max(s))
 
 			w[i] += s[best]/6 * w_prosperity
 
-			print(f"Best: {d[i].name} {resources[best]['name']}: {round(s[best])} ({round(d[i].get_demand(resources[best]))} - {round(self.destination.get_demand(resources[best]))})")
+			if resources[best]['name'] == 'Drugs':
+				pass
+				#print(f"Drug run from l{self.lawfulness}")
+			# print(f"Best: {d[i].name} {resources[best]['name']}: {round(s[best])} ({round(d[i].get_demand(resources[best]))} - {round(self.destination.get_demand(resources[best]))})")
+
+
+		for i in n:
+			# FUTURE-POTENTIAL WEIGHT (eg looking ahead bc something on another dest will make them rich)
+			continue
+			dis = (1 + (1000000/Vector2.distance(self.position, d[i].position)**2)**1.5)
+			w[i] += dis * w_distance
+
 
 		for i in n:
 			w[i] += 0
