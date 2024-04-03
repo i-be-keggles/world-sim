@@ -68,7 +68,7 @@ class Actor():
 		# find item with highest supply
 		supply = [s.supply for s in self.destination.stocks]
 		#stock = self.destination.stocks[supply.index(max([s.supply.amount for s in self.destination.stocks]))]
-		resource = self.find_best_buy(self.destination, next_destination, log=True)
+		resource = self.find_best_buy(self.destination, next_destination, log=False)
 		if resource is None:
 			#print(f"No good buy.")
 			return
@@ -105,6 +105,8 @@ class Actor():
 
 			ps += f"{stock.amount} {stock.resource['name']} "
 
+			if stock.resource['name'] == "Drugs":
+				print(f"selling {stock.amount} rugs")
 
 		#print(f"Sold {ps}")
 
@@ -129,12 +131,12 @@ class Actor():
 	def find_new_destination(self):
 		d = self.destinations.copy()
 		d.remove(self.destination)
-		w, d = self.destination_weights(d, 1, 1)
+		w, d = self.destination_weights(d, 1, 1, 1)
 		d = random.choices(d, weights = w)
 		return d[0]
 
 
-	def destination_weights(self, d, w_distance, w_prosperity):
+	def destination_weights(self, d, w_distance, w_prosperity, w_potential):
 		w = [0 for x in d]
 		
 		n = range(len(d))
@@ -151,18 +153,22 @@ class Actor():
 	def find_best_buy(self, cur_destination, next_destination, w_demand = 1, w_lawfulness = 10, log=False):
 		p_buy = []
 		weights = []
+
+		ignore_understocked = True
+
 		for stock in cur_destination.stocks:
-			if stock.supply > stock.target and stock.resource not in [p.resource for p in self.prev_sell]:
+			if ((stock.supply > stock.target) or ignore_understocked) and stock.resource not in [p.resource for p in self.prev_sell] and next_destination.get_target_supply(stock.resource):
 					p_buy.append(stock.resource)
 					w = 0
-					w += next_destination.get_demand(stock.resource) * stock.resource['value'] * w_demand
+					w += (next_destination.get_demand(stock.resource) - cur_destination.get_demand(stock.resource)) * stock.resource['value'] * w_demand
 					w += (stock.resource['legality'] - max(stock.resource['legality'], self.lawfulness)) * w_lawfulness * stock.resource['value']
 					weights.append(w)
 
 					if log:
 						print(f"stock: {stock.resource['name']}, lawfulness: {self.lawfulness}, weight:{w}")
 
-		if len(p_buy) == 0 or max(weights) < 0 or sum(weights) == 0:
+		if len(p_buy) == 0 or max(weights) <= 0 or sum(weights) == 0:
+			#print(f"everything fucked at {cur_destination.name}")
 			return None
 		else:
 			m = min(weights)
@@ -178,7 +184,7 @@ class Actor():
 
 
 class Trader(Actor):
-	def destination_weights(self, d, w_distance, w_prosperity):
+	def destination_weights(self, d, w_distance, w_prosperity, w_potential):
 
 		#possible things to buy
 		p_supply = []
@@ -229,18 +235,17 @@ class Trader(Actor):
 
 			w[i] += s[best]/6 * w_prosperity
 
-			if resources[best]['name'] == 'Drugs':
-				pass
-				#print(f"Drug run from l{self.lawfulness}")
-			# print(f"Best: {d[i].name} {resources[best]['name']}: {round(s[best])} ({round(d[i].get_demand(resources[best]))} - {round(self.destination.get_demand(resources[best]))})")
-
 
 		for i in n:
 			# FUTURE-POTENTIAL WEIGHT (eg looking ahead bc something on another dest will make them rich)
-			continue
-			dis = (1 + (1000000/Vector2.distance(self.position, d[i].position)**2)**1.5)
-			w[i] += dis * w_distance
+			s = 0
+			for stock in d[i].stocks:
+				s += max(0, -d[i].get_demand(stock.resource))
+			w[i] += s * w_potential
 
+
+		for i in n:
+			w[i] = max(w[i], 0.00001)
 
 		for i in n:
 			w[i] += 0
