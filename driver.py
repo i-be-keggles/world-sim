@@ -11,6 +11,8 @@ n_actors = 15
 resource_multiplier = 2
 resource_generation_rate = 0.02
 
+width, height = 2000, 1000
+
 root = Tk()
 root.title("World Simulation")
 root.configure(bg="black")
@@ -30,6 +32,24 @@ Generator.generation_rate = resource_generation_rate
 locations = []
 actors = []
 
+
+
+def draw_grid(cell_size):
+    # Draw the horizontal lines
+    for i in range(0, height, cell_size):
+        c = "#1d2026"
+        if (i//cell_size) % 5 is 0:
+            c = "#202329"
+        canvas.create_line(0, i, width, i, fill=c)
+
+    # Draw the vertical lines
+    for i in range(0, width, cell_size):
+        c = "#1d2026"
+        if (i//cell_size) % 5 is 0:
+            c = "#202329"
+        canvas.create_line(i, 0, i, height, fill=c)
+
+draw_grid(50)
 
 def paint(pos, size = 5, colour="white"):
     x1, y1 = (pos.x - size), (pos.y - size)
